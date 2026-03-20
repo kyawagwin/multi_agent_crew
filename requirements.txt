@@ -1,0 +1,7 @@
+crewai
+langchain-openai
+tavily-python
+pymongo
+requests
+python-dotenv
+pydantic
