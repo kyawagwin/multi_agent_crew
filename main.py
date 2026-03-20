@@ -16,11 +16,20 @@ def send_to_webhook(data: dict):
     if not webhook_url:
         print("WEBHOOK_URL not configured, skipping webhook push.")
         return
-    
+    # Format data for messaging platforms like Discord or Slack
+    formatted_message = f"**New Stock Analysis**\n"
+    for key, value in data.items():
+        if isinstance(value, list):
+            formatted_message += f"\n**{key.replace('_', ' ').title()}:**\n" + "\n".join(f"- {v}" for v in value)
+        else:
+            formatted_message += f"\n**{key.replace('_', ' ').title()}:**\n{value}"
+            
+    payload = {"content": formatted_message}
+
     try:
         response = requests.post(
             webhook_url,
-            json=data,
+            json=payload,
             headers={"Content-Type": "application/json"}
         )
         response.raise_for_status()
@@ -95,9 +104,9 @@ def main():
         print("\n--- Final Analysis Result ---")
         print(json.dumps(output_dict, indent=2))
         
-        # 6. Save to DB and Send Webhook
-        save_to_mongodb(output_dict)
+        # 6. Send Webhook and Save to DB
         send_to_webhook(output_dict)
+        save_to_mongodb(output_dict)
         
     except Exception as e:
         print(f"An error occurred during workflow execution: {e}")
